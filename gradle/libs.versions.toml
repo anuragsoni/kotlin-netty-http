@@ -1,0 +1,26 @@
+[versions]
+dokka = "1.9.10"
+jqwik-kotlin = "1.8.2"
+junit-launcher = "1.10.2"
+kotlin = "1.9.22"
+kotlinx-coroutines = "1.8.0"
+netty = "4.1.107.Final"
+netty-iouring = "0.0.24.Final"
+spotless = "6.25.0"
+version-catalog-update = "0.8.4"
+versions-plugin = "0.51.0"
+
+[libraries]
+jqwik-kotlin = { module = "net.jqwik:jqwik-kotlin", version.ref = "jqwik-kotlin" }
+junit-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-launcher" }
+kotlin-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+netty-all = { module = "io.netty:netty-all", version.ref = "netty" }
+netty-iouring = { module = "io.netty.incubator:netty-incubator-transport-native-io_uring", version.ref = "netty-iouring" }
+
+[plugins]
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }
