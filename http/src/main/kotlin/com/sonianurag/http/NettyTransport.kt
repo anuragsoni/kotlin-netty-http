@@ -4,6 +4,9 @@ import io.netty.channel.EventLoopGroup
 import io.netty.channel.epoll.Epoll
 import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.epoll.EpollServerSocketChannel
+import io.netty.channel.kqueue.KQueue
+import io.netty.channel.kqueue.KQueueEventLoopGroup
+import io.netty.channel.kqueue.KQueueServerSocketChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.ServerSocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
@@ -21,11 +24,7 @@ interface Transport {
   fun eventLoopGroup(threadCount: Int, daemon: Boolean, threadPoolName: String): EventLoopGroup
 }
 
-class EpollTransport : Transport {
-
-  init {
-    require(Epoll.isAvailable()) { "Epoll transport isn't available on the host system." }
-  }
+object EpollTransport : Transport {
 
   override val serverSocketChannelKClass: KClass<out ServerSocketChannel> =
       EpollServerSocketChannel::class
@@ -44,7 +43,26 @@ class EpollTransport : Transport {
   }
 }
 
-class NioTransport : Transport {
+object KqueueTransport : Transport {
+
+  override val serverSocketChannelKClass: KClass<out ServerSocketChannel> =
+      KQueueServerSocketChannel::class
+
+  override fun isAvailable(): Boolean {
+    return KQueue.isAvailable()
+  }
+
+  override fun eventLoopGroup(
+      threadCount: Int,
+      daemon: Boolean,
+      threadPoolName: String
+  ): EventLoopGroup {
+    val threadFactory = DefaultThreadFactory(threadPoolName, true)
+    return KQueueEventLoopGroup(threadCount, threadFactory)
+  }
+}
+
+object NioTransport : Transport {
   override val serverSocketChannelKClass: KClass<out ServerSocketChannel> =
       NioServerSocketChannel::class
 
@@ -62,11 +80,7 @@ class NioTransport : Transport {
   }
 }
 
-class IOUringTransport : Transport {
-
-  init {
-    require(IOUring.isAvailable()) { "IOUring transport isn't available on the host system." }
-  }
+object IOUringTransport : Transport {
 
   override val serverSocketChannelKClass: KClass<out ServerSocketChannel> =
       IOUringServerSocketChannel::class
@@ -87,8 +101,9 @@ class IOUringTransport : Transport {
 
 fun initializeTransport(): Transport {
   return when {
-    Epoll.isAvailable() -> EpollTransport()
-    IOUring.isAvailable() -> IOUringTransport()
-    else -> NioTransport()
+    EpollTransport.isAvailable() -> EpollTransport
+    KqueueTransport.isAvailable() -> KqueueTransport
+    IOUringTransport.isAvailable() -> IOUringTransport
+    else -> NioTransport
   }
 }
